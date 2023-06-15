@@ -1,35 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <script type="module">
-        import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
-        function main() {
-            const socket = io();
-            socket.on("numPlayers", (numPlayers) => {
-                const numPlayersSpan = document.getElementById("numPlayers");
-                numPlayersSpan.textContent = numPlayers;
-            });
-            const form = document.getElementById('form');
-            form.addEventListener("submit", function(event) {
-                socket.emit('new_challenge');
-                event.preventDefault();
-            });
-        }
-        document.addEventListener("DOMContentLoaded", function(event) {
-            main();
-        });
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="main.css">
+  <title>Document</title>
+  <script type="module">
+    import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
+    function main() {
+      const socket = io();
+      socket.on("numPlayers", (numPlayers) => {
+        const numPlayersSpan = document.getElementById("numPlayers");
+        numPlayersSpan.textContent = numPlayers;
+      });
+      const form = document.getElementById('form');
+      form.addEventListener("submit", function (event) {
+        socket.emit('new_challenge');
+        event.preventDefault();
+      });
+      const challengeCard = document.getElementById('challenge_card');
+      socket.on('challenge', (challenge) => {
+        const challengeDiv = document.getElementById('challenge');
+        challengeDiv.textContent = challenge;
+        challengeCard.classList.add('flipped');
+      });
+      challengeCard.addEventListener("click", function (event) {
+        challengeCard.classList.toggle('flipped');
+      });
+    }
+    document.addEventListener("DOMContentLoaded", function (event) {
+      main();
+    });
+  </script>
 </head>
+
 <body>
-    <body>
-        <div>總共<span id="numPlayers"></span>個玩家</div>
-        <form id="form" action="">
-          <button type="submit">Send</button>
-        </form>
-        
-    </body>
+  <h3>總共<span id="numPlayers"></span>個玩家</h3>
+  <form id="form" action="">
+    <button type="submit" id="new_challenge_button">新題目</button>
+  </form>
+  <div class="flip-card">
+    <div class="flip-card-inner" id="challenge_card">
+      <div class="flip-card-front">
+        <h1>睇多次題目</h1>
+      </div>
+      <div class="flip-card-back">
+        <h1 id="challenge">未有題目</h1>
+        <h2>㩒呢到反轉張卡</h2>
+        <h2>唔好比人睇到呀 😂 </h2>
+      </div>
+    </div>
+  </div>
 </body>
+
 </html>
