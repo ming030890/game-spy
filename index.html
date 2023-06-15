@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script type="module">
+        import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
+        function main() {
+            const socket = io("http://localhost:3000");
+            socket.on("numPlayers", (numPlayers) => {
+                const numPlayersSpan = document.getElementById("numPlayers");
+                numPlayersSpan.textContent = numPlayers;
+            });
+            const form = document.getElementById('form');
+            form.addEventListener("submit", function(event) {
+                socket.emit('new_challenge');
+                event.preventDefault();
+            });
+        }
+        document.addEventListener("DOMContentLoaded", function(event) {
+            main();
+        });
+    </script>
+</head>
+<body>
+    <body>
+        <div>總共<span id="numPlayers"></span>個玩家</div>
+        <form id="form" action="">
+          <button type="submit">Send</button>
+        </form>
+        
+    </body>
+</body>
+</html>
