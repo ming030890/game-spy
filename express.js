@@ -6,7 +6,7 @@ var options = {
   etag: false,
   extensions: ['htm', 'html','css','js','ico','jpg','jpeg','png','svg'],
   index: ['index.html'],
-  maxAge: '1m',
+  maxAge: '1000',
   redirect: false
 }
 app.use(express.static('public', options))
