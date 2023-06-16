@@ -107,18 +107,19 @@
 }
 
 #login_form {
-  display: flex;
-  justify-content: space-between;
+  margin: auto;
+  width: 80%;
+  border: 3px solid black;
+  padding: 10px;
 }
 
 #login_form>input {
-  flex-basis: 60%;
-  font-size: 2em;
-  line-height: 2em; 
+  font-size: 3em;
+  width: 100%;
 }
 
 #login_form>button {
-  flex-basis: auto;
-  font-size: 2.0em;
-  padding: 4px;
+  font-size: 3.0em;
+  width: 100%;
+  text-align: center;
 }
