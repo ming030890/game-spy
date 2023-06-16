@@ -8,22 +8,56 @@
   <title>Document</title>
   <script type="module">
     import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
+    const socket = io({ autoConnect: false });
+
+    function drawVotingCards(players) {
+      playersContainer.innerHTML = "";
+      for (const player of players) {
+        const playerDiv = document.createElement('div');
+        playerDiv.textContent = player;
+        playerDiv.addEventListener("click", (event) => {
+          socket.emit('vote', playerDiv.textContent);
+        });
+        playersContainer.appendChild(playerDiv);
+      }
+    }
+
     function main() {
-      const socket = io();
       socket.on("numPlayers", (numPlayers) => {
         const numPlayersSpan = document.getElementById("numPlayers");
         numPlayersSpan.textContent = numPlayers;
       });
       const form = document.getElementById('form');
       form.addEventListener("submit", function (event) {
+        const winnerDiv = document.getElementById('winner_div');
+        winnerDiv.textContent = "";
         socket.emit('new_challenge');
         event.preventDefault();
       });
       const challengeCard = document.getElementById('challenge_card');
-      socket.on('challenge', (challenge) => {
+      socket.on('challenge', (response) => {
+        const challenge = response.challenge;
         const challengeDiv = document.getElementById('challenge');
         challengeDiv.textContent = challenge;
         challengeCard.classList.add('flipped');
+
+        const players = response.players;
+        drawVotingCards(players);
+      });
+      socket.on('next_round', (players) => {
+        drawVotingCards(players);
+      });
+      socket.on('win', (response) => {
+        const winnerDiv = document.getElementById('winner_div');
+        const winner = response.winner;
+        const spyUserName = response.spy;
+        let winnerMessage = `${spyUserName} 係間諜，`;
+        if (winner === 'spy') {
+          winnerMessage += "間諜勝出！";
+        } else {
+          winnerMessage += "其他人勝出！";
+        }
+        winnerDiv.textContent = winnerMessage;
       });
       challengeCard.addEventListener("click", function (event) {
         challengeCard.classList.toggle('flipped');
@@ -32,25 +66,52 @@
     document.addEventListener("DOMContentLoaded", function (event) {
       main();
     });
+    const login_form = document.getElementById('login_form');
+    const usernameInput = document.getElementById('username');
+    const savedUserName = localStorage.getItem('username');
+    const playersContainer = document.getElementById('players_container');
+    if (savedUserName) {
+      usernameInput.value = savedUserName;
+    }
+    const gameDiv = document.getElementById('game');
+    gameDiv.style.display = "none";
+    login_form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      const username = usernameInput.value;
+      localStorage.setItem("username", username);
+      login_form.style.display = "none";
+      gameDiv.style.display = "initial";
+      socket.auth = { 'username': username };
+      socket.connect();
+    });
   </script>
 </head>
 
 <body>
-  <h3>總共<span id="numPlayers"></span>個玩家</h3>
-  <form id="form" action="">
-    <button type="submit" id="new_challenge_button">新題目</button>
+  <form id="login_form" action="">
+    <input type="text" id="username" placeholder="玩家名稱"></input>
+    <button type="submit" id="login_button">登入</button>
   </form>
-  <div class="flip-card">
-    <div class="flip-card-inner" id="challenge_card">
-      <div class="flip-card-front">
-        <h1>睇多次題目</h1>
-      </div>
-      <div class="flip-card-back">
-        <h1 id="challenge">未有題目</h1>
-        <h2>㩒呢到反轉張卡</h2>
-        <h2>唔好比人睇到呀 😂 </h2>
+  <div id="game">
+    <h3>總共<span id="numPlayers"></span>個玩家</h3>
+    <form id="form" action="">
+      <button type="submit" id="new_challenge_button">新題目</button>
+    </form>
+    <div class="flip-card">
+      <div class="flip-card-inner" id="challenge_card">
+        <div class="flip-card-front">
+          <h1>睇多次題目</h1>
+        </div>
+        <div class="flip-card-back">
+          <h1 id="challenge">未有題目</h1>
+          <h2>㩒呢到反轉張卡</h2>
+          <h2>唔好比人睇到呀 😂 </h2>
+        </div>
       </div>
     </div>
+    <div id="players_container">
+    </div>
+    <div id="winner_div"></div>
   </div>
 </body>
 
