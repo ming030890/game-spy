@@ -84,9 +84,12 @@ io.use((socket, next) => {
 
 io.on('connection', async (socket) => {
   console.log(`a user connected ${socket.username}`);
-  socket.on('disconnect', () => {
+  socket.on('disconnect', async () => {
     console.log(`user disconnected ${socket.username}`);
-    emitNumUsers();
+    await emitNumUsers();
+    const index = alivePlayers.indexOf(socket.username);
+    alivePlayers.splice(index, 1);
+    io.emit('next_round', alivePlayers);
   });
   await emitNumUsers();
   onNewChallenge(socket);
